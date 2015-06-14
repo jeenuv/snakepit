@@ -41,7 +41,7 @@ safe_string = lambda str: str.replace("*/", " ")
 # Print a blank line if the previous line wasn't blank. Ignore at the at the
 # beginning of the file
 def print_blank():
-    if (lines > 0 and not prev_line.isspace()):
+    if lines > 1 and not prev_line.isspace():
         print()
 
 # Print a single line of comment. Put a blank line beforehand, if there wasn't
