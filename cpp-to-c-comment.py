@@ -28,12 +28,11 @@ lines = 0
 # space already
 def pad_space(str, head = None, tail = None):
     s = str
-    if len(s) == 0:
-        return ""
-    if head and not s[0].isspace():
-        s = head + s
-    if tail and not s[-1].isspace():
-        s = s + tail
+    if len(s) > 0:
+        if head and not s[0].isspace():
+            s = head + s
+        if tail and not s[-1].isspace():
+            s = s + tail
     return s
 
 # Replace all "*/" in @str so that it can be placed inside a C comment
