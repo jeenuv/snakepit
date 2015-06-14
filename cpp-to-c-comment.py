@@ -102,6 +102,7 @@ with open(sys.argv[1]) as f:
 
         # Partition line at the comment
         pre, c, post = line.partition("//")
+
         if len(c) == 0:
             # This line doesn't have comment. Print as is
             flush_comments()
@@ -109,21 +110,19 @@ with open(sys.argv[1]) as f:
 
             # Save the current line
             prev_line = line
+            continue
 
-        elif len(comments) == 0:
-            # If we haven't captured any comments yet
-            add_comment(pre, post.rstrip())
-
-        else:
+        elif len(comments) > 0:
             # Check the indent of this comment
             if len(indent) != len(pre):
                 # Indent of this comment doesn't match that of captured comments
                 # Flush comments captured so far
                 flush_comments()
 
-            # Start a new capture
-            add_comment(pre, post.rstrip())
+        # Capture comment
+        add_comment(pre, post.rstrip())
 
+    # Flush all comments
     flush_comments()
 
 
