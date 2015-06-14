@@ -100,13 +100,13 @@ with open(sys.argv[1]) as f:
     for line in f:
         lines += 1
 
-        # Partition line at the comment
-        pre, c, post = line.partition("//")
+        # Partition line (stripped off tailing new line) at the comment
+        pre, c, post = line.rstrip('\r\n').partition("//")
 
         if len(c) == 0:
             # This line doesn't have comment. Print as is
             flush_comments()
-            print(pre, end="")
+            print(pre)
 
             # Save the current line
             prev_line = line
@@ -120,7 +120,7 @@ with open(sys.argv[1]) as f:
                 flush_comments()
 
         # Capture comment
-        add_comment(pre, post.rstrip())
+        add_comment(pre, post)
 
     # Flush all comments
     flush_comments()
