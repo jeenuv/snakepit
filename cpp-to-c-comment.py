@@ -9,9 +9,16 @@
 #                                               * and this comment
 #                                               */
 #
-# Only one input file must be passed as agument. The input file is assumed to be
-# well-formed.
+# A blank line will inserted before single or block comments (not trailing ones, as the first
+# above), if the comment indent is <= than that of previous line
 #
+# Only one input file must be passed as argument. The following are assumed:
+#
+#   - The file is well-formed
+#   - No CPP comments inside already existing C comments, and vice versa
+#   - All indents are uniformly made with either tabs or spaces, but not mixed
+#
+# Output is printed to stdout
 
 import sys
 
@@ -26,7 +33,7 @@ lines = 0
 
 # Make sure @str is padded by @head and @tail at both ends if there isn't white
 # space already
-def pad_space(str, head = None, tail = None):
+def pad_space(str, head = " ", tail = " "):
     s = str
     if len(s) > 0:
         if head and not s[0].isspace():
@@ -46,12 +53,10 @@ def print_blank():
 
 # Print a single line of comment. Put a blank line beforehand, if there wasn't
 # one
-def print_one_comment(pre, post, blank):
-    if (blank):
-        print_blank()
-    print(pre + "/*" + pad_space(safe_string(post), head = " ") + " */")
+def print_one_comment(pre, post):
+    print(pre + "/*" + pad_space(safe_string(post)) + "*/")
 
-# Flush all comments collected so far.  If there's only one line, print that
+# Flush all comments collected so far. If there's only one line, print that
 # alone; otherwise print a block comment with a blank line before
 def flush_comments():
     global comments
@@ -61,15 +66,25 @@ def flush_comments():
     if l == 0:
         # Nothing to print
         return
-    elif l == 1:
-        # Only one comment
-        print_one_comment(indent, comments[0], False)
-    else:
-        # Print a block comment
+
+    # Calculate the indent of previous line
+    prev_indent = len(prev_line) - len(prev_line.lstrip())
+
+    # If the indent of the previous line matches with that of the current
+    # one, we print a blank line, to make the comment stand out
+    # Additionally, we ignore previous lines that at column zero, so that we don't insert a
+    # blank line immediately after a label and such
+    if prev_indent > 0 and len(indent) <= prev_indent:
         print_blank()
+
+    if l == 1:
+        # Only one comment
+        print_one_comment(indent, comments[0])
+    else:
+        # Block comment. Print a blank line only after a line at non-zero indent
         print(indent + "/*")
         for c in comments:
-            print(indent + " *" + pad_space(safe_string(c)))
+            print(indent + " *" + pad_space(safe_string(c), tail = ""))
         print(indent + " */")
 
     # Clear all comments
@@ -83,10 +98,10 @@ def add_comment(pre, post):
     global line
 
     if len(pre) > 0 and not pre.isspace():
-        # someting // blah blah
+        # something // blah blah
         # Trailing comment. Flush pending comments and print this alone
         flush_comments()
-        print_one_comment(pad_space(pre, tail = " "), post, False);
+        print_one_comment(pre, post);
         prev_line = line
     else:
         # Standalone comment
